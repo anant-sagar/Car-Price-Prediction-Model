@@ -401,6 +401,7 @@ if  st.checkbox("Make Prediction"):
     with col10:
         age = st.number_input("Age",min_value=0)
 
-    # if st.sidebar.button('Predict')
+    if st.sidebar.button('Predict'):
+        st.write('done')
 
 
