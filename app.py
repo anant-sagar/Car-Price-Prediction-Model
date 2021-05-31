@@ -1,4 +1,5 @@
 from numpy.lib.function_base import percentile
+from pandas.core.algorithms import mode
 from pandas.io.parsers import CParserWrapper
 import streamlit as st
 import numpy as np
@@ -61,13 +62,8 @@ if st.checkbox("About"):
 
 if  st.checkbox("Make Prediction"):
 
-    col1, col2 = st.beta_columns(2)
-
-    with col1:
-        price = st.number_input("Price",min_value=100000)
-        
-    with col2:
-        vehchile_type = st.selectbox("Vehchile Type",['limousine',
+    
+    vehchile_type = st.selectbox("Vehchile Type",['limousine',
  'suv',
  'bus',
  'small car',
@@ -81,7 +77,7 @@ if  st.checkbox("Make Prediction"):
     col3, col4 = st.beta_columns(2)
 
     with col3:
-        gearbox = st.radio("Gearbox",["Manual","Automatic"])
+        gearbox = st.radio("Gearbox",["manual","automatic"])
 
     with col4:
         powerPS = st.number_input("Power PS")
@@ -92,7 +88,7 @@ if  st.checkbox("Make Prediction"):
     col5, col6 = st.beta_columns(2)
 
     with col5:
-        model = st.selectbox("Model",['3er',
+        modelname = st.selectbox("Model",['3er',
  'xc_reihe',
  'touran',
  'ibiza',
@@ -396,12 +392,26 @@ if  st.checkbox("Make Prediction"):
     col9, col10 = st.beta_columns(2)
 
     with col9:
-        non_repair_damage = st.radio("Non Repair Damage",["Yes","No"])
+        non_repair_damage = st.radio("Non Repair Damage",["yes","no"])
 
     with col10:
         age = st.number_input("Age",min_value=0)
 
     if st.sidebar.button('Predict'):
-        st.write('done')
-
+        modelinfo = load_model('price_pediction.pk')
+        model = modelinfo['model']
+        encoders = modelinfo['encoder_dict']
+    
+        ve = encoders['vt'].transform(np.array([[vehchile_type]])).toarray()
+        ge = encoders['gear'].transform(np.array([[gearbox]])).toarray()
+        me = encoders['model'].transform(np.array([[modelname]])).toarray()
+        be = encoders['brand'].transform(np.array([[brand]])).toarray()
+        ne = encoders['nrd'].transform(np.array([[non_repair_damage]])).toarray()
+        fe = encoders['fuel'].transform(np.array([[fule_type]])).toarray()
+        # st.write('done')
+        number_data = np.array([[powerPS,kilometer,age]])
+        data = np.hstack((ve,ge,me,fe,be,ne,number_data))
+        result = model.predict(data)
+        st.success('the predicted price is:')
+        st.subheader(result[0])
 
